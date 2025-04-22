@@ -1,0 +1,39 @@
+import subprocess
+
+def save(content:str,path:str) -> None | str:
+    try:
+        with open(path, 'w', encoding="utf-8") as file:
+            file.write(content)
+    except FileNotFoundError:
+        return "The given path was not found"
+    except PermissionError:
+        return ""
+    except Exception as e:
+        return f"Unexpected error: {e}"
+
+def load_file(path:str) -> None | str:
+    try:
+        if not path:
+            return
+        with open(path, 'r', encoding="utf-8") as file:
+            content = file.read()
+            return content
+    except FileNotFoundError:
+        return "The given path was not found."
+    except PermissionError:
+        return "You do not have permission to open this file."
+    except Exception as e:
+        return f"Unexpected error: {e}"
+
+def run(path:str):
+    result = subprocess.run(["python", path], capture_output=True, text=True)
+    print(result)
+    return f"{result.stdout} \nExit code: {result.returncode}"
+
+def new(path):
+    with open(path, "w") as file:
+        file.write("")
+
+if __name__ == '__main__':
+    run("C:\\Users\\Jason Chundusu\\Desktop\\c8\\text.py")
+

@@ -27,13 +27,14 @@ def load_file(path:str) -> None | str:
 
 def run(path:str):
     result = subprocess.run(["python", path], capture_output=True, text=True)
-    print(result)
-    return f"{result.stdout} \nExit code: {result.returncode}"
+    return f"{result.args[0]} \"{result.args[1]}\"\n{result.stdout}\nReturn code: {result.returncode}" if not result.stderr else \
+        f"{result.args[0]} \"{result.args[1]}\"\n{result.stderr}\nReturn code: {result.returncode}"
 
 def new(path):
     with open(path, "w") as file:
         file.write("")
 
 if __name__ == '__main__':
-    run("C:\\Users\\Jason Chundusu\\Desktop\\c8\\text.py")
+    result = run("C:\\Users\\Jason Chundusu\\Desktop\\c8\\text.py")
+    print(result)
 

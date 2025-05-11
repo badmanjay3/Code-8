@@ -3,7 +3,8 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 from utils import load_file, run, save, new
-from time import sleep
+from syntax_highlighter import SyntaxHighlighter
+from pathlib import Path
 
 
 class MainWindow(QMainWindow):
@@ -16,7 +17,11 @@ class MainWindow(QMainWindow):
         uic.loadUi("C:\\Users\\Jason Chundusu\\Desktop\\Code 8\\Assets\\c8.1.3.ui", self)
         self.setWindowTitle("Code 8")
 
-        # Layout and Splitter
+        # Syntax Highlighter
+        self.highlighter = SyntaxHighlighter(self.textEditCodeArea.document())
+        self.highlighter.set_language(self.extension)
+
+        # Arranging layout
         splitter1 = QSplitter(Qt.Vertical)
         splitter1.addWidget(self.textEditCodeArea)
         splitter1.addWidget(self.textEditOutput)
@@ -51,7 +56,6 @@ class MainWindow(QMainWindow):
         self.actionNew.triggered.connect(self.new_)
         self.actionOpen.triggered.connect(self.open_)
         self.actionClose.triggered.connect(self.close_)
-
         self.actionAuto_save.setCheckable(True)
         self.actionAuto_save.toggled.connect(self.toggle_auto_save)
 
@@ -77,10 +81,12 @@ class MainWindow(QMainWindow):
         if file_info[0]:
             file = load_file(file_info[0])
             self.path = file_info[0]
-            self.extension = file_info[1]
+            self.extension = Path(file_info[0]).suffix.lstrip('.')
             self.textEditCodeArea.setPlainText(file)
+            self.highlighter.set_language(self.extension)
+            self.highlighter.rehighlight()
             self.statusBar().showMessage("File Opened Successfully", 3000)
-            self.updateStatusBar(self.path)
+            self.update_status_bar(self.path)
 
     def save_(self):
         if self.path:
@@ -93,21 +99,23 @@ class MainWindow(QMainWindow):
         if file[0]:
             save(self.textEditCodeArea.toPlainText(), file[0])
             self.path = file[0]
-            self.updateStatusBar(file[0])
+            self.update_status_bar(file[0])
 
     def new_(self):
         file = QFileDialog.getSaveFileName(self, "New File", self.path, "*.py;; *.cpp;; *.html;; *.css;; *.txt")
         if file[0]:
             new(file[0])
             self.path = file[0]
-            self.extension = file[1]
+            self.extension = Path(file[0]).suffix[::1].lstrip('.')
+            self.highlighter.set_language(self.extension)
+            self.highlighter.rehighlight()
             self.textEditCodeArea.setPlainText('')
-            self.updateStatusBar(self.path)
+            self.update_status_bar(self.path)
 
     def close_(self):
         self.path = ''
         self.textEditCodeArea.setPlainText('')
-        self.updateStatusBar("Untitled File")
+        self.update_status_bar("Untitled File")
         self.statusBar().showMessage("File Closed Successfully", 3000)
 
     def run_(self):
@@ -127,7 +135,7 @@ class MainWindow(QMainWindow):
         font = QFont("Consolas", 10)
         self.textEditCodeArea.setFont(font)
 
-    def updateStatusBar(self, text):
+    def update_status_bar(self, text):
         self.statusLabel.setText(text)
 
 

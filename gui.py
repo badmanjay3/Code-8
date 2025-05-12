@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
         if file[0]:
             new(file[0])
             self.path = file[0]
-            self.extension = Path(file[0]).lstrip('.')
+            self.extension = Path(file[0]).suffix.lstrip('.')
             self.tree_view()
             self.highlighter.set_language(self.extension)
             self.highlighter.rehighlight()

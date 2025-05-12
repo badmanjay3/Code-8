@@ -65,5 +65,4 @@ def run(path):
 
 
 if __name__ == '__main__':
-    #print(run_python('testroom.py'))
     print(run("testroom.py"))

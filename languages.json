@@ -1,0 +1,33 @@
+{
+  "languages": {
+    "py": {
+      "patterns": [
+        { "regex": "\\b(def|class|if|else|elif|return|import|from|while|for|in|try|except|raise|with|as|pass|break|continue|lambda|yield|None|True|False)\\b", "format": "keyword" },
+        { "regex": "#.*", "format": "comment" },
+        { "regex": "\".*?\"|'.*?'", "format": "string" },
+        { "regex": "\\b\\d+(\\.\\d+)?\\b", "format": "number" },
+        { "regex": "\\bdef\\s+(\\w+)\\b", "format": "function" },
+        { "regex": "\\bclass\\s+(\\w+)\\b", "format": "class" }
+      ]
+    },
+    "cpp": {
+      "patterns": [
+        { "regex": "\\b(int|float|double|char|void|bool|return|if|else|for|while|switch|case|break|continue|new|delete|class|struct|public|private|protected|virtual|override|template|typename|using|namespace|try|catch|throw)\\b", "format": "keyword" },
+        { "regex": "//.*|/\\*.*?\\*/", "format": "comment" },
+        { "regex": "\".*?\"", "format": "string" },
+        { "regex": "\\b\\d+(\\.\\d+)?\\b", "format": "number" },
+        { "regex": "\\b\\w+\\s+(\\w+)\\s*\\(", "format": "function" },
+        { "regex": "\\bclass\\s+(\\w+)\\b", "format": "class" }
+      ]
+    }
+  },
+
+  "formats": {
+    "keyword": { "color": "#FF5555", "bold": true },
+    "comment": { "color": "#888888", "italic": true },
+    "string": { "color": "#50FA7B" },
+    "number": { "color": "#BD93F9" },
+    "function": { "color": "#8BE9FD", "bold": true },
+    "class": { "color": "#F1FA8C", "underline": true }
+  }
+}

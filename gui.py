@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QFileDialog, QLabel, QVBoxLayout, QWidget
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QFileDialog, QLabel, QVBoxLayout, QWidget, QHBoxLayout
+from PyQt5.QtGui import QFont, QTextBlock
+from PyQt5.QtCore import Qt, QPoint
 from PyQt5 import uic
 from utils import load_file, run, save, new
 from syntax_highlighter import SyntaxHighlighter
@@ -16,14 +16,26 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi("C:\\Users\\Jason Chundusu\\Desktop\\Code 8\\Assets\\c8.1.3.ui", self)
         self.setWindowTitle("Code 8")
+        self.visible_lines = []
 
         # Syntax Highlighter
         self.highlighter = SyntaxHighlighter(self.textEditCodeArea.document())
         self.highlighter.set_language(self.extension)
 
+        # Viewport change tracker
+        self.textEditCodeArea.updateRequest.connect(self.update_visible_lines)
+
         # Arranging layout
+        self.lineNumber.setReadOnly(True)
+        self.lineNumber.setFixedWidth(70)
+        code_area_layout = QHBoxLayout()
+        code_area_layout.addWidget(self.lineNumber)
+        code_area_layout.addWidget(self.textEditCodeArea)
+        code_area_widget = QWidget()
+        code_area_widget.setLayout(code_area_layout)
+
         splitter1 = QSplitter(Qt.Vertical)
-        splitter1.addWidget(self.textEditCodeArea)
+        splitter1.addWidget(code_area_widget)
         splitter1.addWidget(self.textEditOutput)
         self.textEditOutput.setReadOnly(True)
         splitter1.setStretchFactor(0, 3)
@@ -58,6 +70,29 @@ class MainWindow(QMainWindow):
         self.actionClose.triggered.connect(self.close_)
         self.actionAuto_save.setCheckable(True)
         self.actionAuto_save.toggled.connect(self.toggle_auto_save)
+
+    # Visible blocks
+    def update_visible_lines(self, rect, dy):
+        if rect.height() == 0 and dy == 0:
+            return  # cursor blink only
+
+        block = self.textEditCodeArea.firstVisibleBlock()
+        visible = []
+        block_number = block.blockNumber()
+        top = self.textEditCodeArea.blockBoundingGeometry(block).translated(
+            self.textEditCodeArea.contentOffset()
+        ).top()
+        bottom = self.textEditCodeArea.viewport().height()
+
+        while block.isValid() and top <= bottom:
+            visible.append(str(block_number + 1))
+            top += self.textEditCodeArea.blockBoundingRect(block).height()
+            block = block.next()
+            block_number += 1
+
+        if visible != self.visible_lines:
+            self.lineNumber.setPlainText('\n'.join(visible))
+            self.visible_lines = visible
 
     def toggle_auto_save(self, checked):
         if checked:

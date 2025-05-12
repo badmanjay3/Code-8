@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QFileDialog, QLabel, QVBoxLayout, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QFileDialog, QLabel, QVBoxLayout, QWidget, \
+    QHBoxLayout, QFileSystemModel
 from PyQt5.QtGui import QFont, QTextBlock
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5 import uic
@@ -48,7 +49,7 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
 
         splitter = QSplitter()
-        splitter.addWidget(self.treeWidget)
+        splitter.addWidget(self.treeViewWidget)
         splitter.addWidget(widget)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 4)
@@ -117,6 +118,7 @@ class MainWindow(QMainWindow):
             file = load_file(file_info[0])
             self.path = file_info[0]
             self.extension = Path(file_info[0]).suffix.lstrip('.')
+            self.tree_view()
             self.textEditCodeArea.setPlainText(file)
             self.highlighter.set_language(self.extension)
             self.highlighter.rehighlight()
@@ -141,7 +143,8 @@ class MainWindow(QMainWindow):
         if file[0]:
             new(file[0])
             self.path = file[0]
-            self.extension = Path(file[0]).suffix[::1].lstrip('.')
+            self.extension = Path(file[0]).lstrip('.')
+            self.tree_view()
             self.highlighter.set_language(self.extension)
             self.highlighter.rehighlight()
             self.textEditCodeArea.setPlainText('')
@@ -172,6 +175,27 @@ class MainWindow(QMainWindow):
 
     def update_status_bar(self, text):
         self.statusLabel.setText(text)
+
+    def tree_view(self):
+        path = Path(self.path)
+        folder = str(path.parent)
+        print(folder)
+        try:
+            model = QFileSystemModel()
+            model.setRootPath(folder)
+
+            self.treeViewWidget.setModel(model)
+            self.treeViewWidget.setRootIndex(model.index(folder))
+
+            # Hide the header and irrelevant columns
+            self.treeViewWidget.setHeaderHidden(True)
+            self.treeViewWidget.hideColumn(1)
+            self.treeViewWidget.hideColumn(2)
+            self.treeViewWidget.hideColumn(3)
+        except TypeError as e:
+            print(f"type error: {e.with_traceback()}")
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":

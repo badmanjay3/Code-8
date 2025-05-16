@@ -19,15 +19,47 @@
         { "regex": "\\b\\w+\\s+(\\w+)\\s*\\(", "format": "function" },
         { "regex": "\\bclass\\s+(\\w+)\\b", "format": "class" }
       ]
+    },
+    "js": {
+      "patterns": [
+        { "regex": "\\b(function|return|var|let|const|if|else|for|while|do|break|continue|switch|case|default|throw|try|catch|finally|new|in|instanceof|typeof|this|null|undefined|true|false|async|await|class|extends|super|import|from|export)\\b", "format": "keyword" },
+        { "regex": "//.*", "format": "comment" },
+        { "regex": "/\\*.*?\\*/", "format": "comment" },
+        { "regex": "\".*?\"|'.*?'|`.*?`", "format": "string" },
+        { "regex": "\\b\\d+(\\.\\d+)?\\b", "format": "number" },
+        { "regex": "\\bfunction\\s+(\\w+)\\b", "format": "function" },
+        { "regex": "\\bclass\\s+(\\w+)\\b", "format": "class" }
+      ]
+    },
+    "html": {
+      "patterns": [
+        { "regex": "<\\/?\\w+[^>]*>", "format": "tag" },
+        { "regex": "\\b\\w+(?==)", "format": "attribute" },
+        { "regex": "\".*?\"|'.*?'", "format": "string" },
+        { "regex": "<!--.*?-->", "format": "comment" }
+      ]
+    },
+    "css": {
+      "patterns": [
+        { "regex": "\\b(color|background|border|margin|padding|font|display|position|top|left|right|bottom|width|height|content|align-items|justify-content|flex|grid|z-index)\\b", "format": "property" },
+        { "regex": "\\b#[0-9a-fA-F]{3,6}\\b", "format": "hexcolor" },
+        { "regex": "\\b\\d+(px|em|rem|%)?\\b", "format": "number" },
+        { "regex": "\\b[a-zA-Z-]+(?=\\s*\\{)", "format": "selector" },
+        { "regex": "/\\*.*?\\*/", "format": "comment" }
+      ]
     }
   },
-
   "formats": {
     "keyword": { "color": "#FF5555", "bold": true },
     "comment": { "color": "#888888", "italic": true },
     "string": { "color": "#50FA7B" },
     "number": { "color": "#BD93F9" },
     "function": { "color": "#8BE9FD", "bold": true },
-    "class": { "color": "#F1FA8C", "underline": true }
+    "class": { "color": "#F1FA8C", "underline": true },
+    "tag": { "color": "#FF79C6", "bold": true },
+    "attribute": { "color": "#FFB86C" },
+    "property": { "color": "#FF79C6" },
+    "hexcolor": { "color": "#8BE9FD" },
+    "selector": { "color": "#BD93F9", "italic": true }
   }
 }

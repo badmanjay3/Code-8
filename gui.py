@@ -5,6 +5,10 @@ from PyQt5 import uic
 from utils import load_file, run, save, new
 from syntax_highlighter import SyntaxHighlighter
 from pathlib import Path
+import webbrowser
+import os
+import threading
+from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 
 class MainWindow(QMainWindow):
@@ -12,6 +16,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi("C:\\Users\\Jason Chundusu\\Desktop\\Code 8\\Assets\\c8.1.3.ui", self)
         self.setWindowTitle("Code 8")
+        self.server_thread = None
+        self.httpd = None
 
         self.tabs = {}  # Maps tab index to editor-related data
         self.tab_widget = QTabWidget()
@@ -129,7 +135,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Auto-saved", 2000)
 
     def open_(self):
-        file_info = QFileDialog.getOpenFileName(self, "Open File", "", "*.py *.cpp *.html *.css *.txt")
+        file_info = QFileDialog.getOpenFileName(self, "Open File", "", "*.py *.cpp *.html *.css *.txt *.js *.json")
         if file_info[0]:
             content = load_file(file_info[0])
             extension = Path(file_info[0]).suffix.lstrip('.')
@@ -172,10 +178,48 @@ class MainWindow(QMainWindow):
 
     def run_(self):
         data = self.current_tab_data()
-        if data.get("path"):
-            result = run(data["path"])
+        if not data.get("path"):
+            self.statusBar().showMessage("No file to run", 2000)
+            return
+
+        extension = data["extension"]
+        file_path = data["path"]
+
+        if extension in ["html", "htm"]:
+            directory = os.path.dirname(file_path)
+            filename = os.path.basename(file_path)
+            port = 8000
+
+            # Stop previous server if running
+            if self.httpd:
+                self.httpd.shutdown()
+                self.httpd = None
+
+            def start_server():
+                os.chdir(directory)
+                self.httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
+                self.httpd.serve_forever()
+
+            self.server_thread = threading.Thread(target=start_server, daemon=True)
+            self.server_thread.start()
+
+            # Open the file in browser via localhost
+            webbrowser.open(f"http://localhost:{port}/{filename}")
+            self.textEditOutput.clear()
+            self.textEditOutput.append(f"Serving {filename} at http://localhost:{port}/")
+
+        elif extension in ["css", "js"]:
+            self.textEditOutput.clear()
+            self.textEditOutput.append("Please run the HTML file that links to this CSS/JS.")
+
+        elif extension in ["py", "cpp"]:
+            result = run(file_path)
             self.textEditOutput.clear()
             self.textEditOutput.append(result)
+
+        else:
+            self.textEditOutput.clear()
+            self.textEditOutput.append("Cannot run this file type.")
 
     def tree_view(self, path):
         folder = str(Path(path).parent)

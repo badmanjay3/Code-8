@@ -146,6 +146,7 @@ class MainWindow(QMainWindow):
 
     def save_(self):
         data = self.current_tab_data()
+        print(data)
         if data.get("path"):
             save(data["editor"].toPlainText(), data["path"])
             self.statusBar().showMessage("File Saved Successfully", 3000)
@@ -158,6 +159,9 @@ class MainWindow(QMainWindow):
             data["path"] = file[0]
             data["extension"] = Path(file[0]).suffix.lstrip('.')
             self.statusLabel.setText(file[0])
+            highlighter = data.get("highlighter")
+            highlighter.set_language(data["extension"])
+            highlighter.rehighlight()
 
     def new_(self):
         file = QFileDialog.getSaveFileName(self, "New File", "", "*.py;; *.cpp;; *.html;; *.css;; *.txt")

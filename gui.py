@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QFileDialog, QLabel, QVBoxLayout, QWidget, \
-    QHBoxLayout, QFileSystemModel, QTextEdit, QPlainTextEdit, QTabWidget
+    QHBoxLayout, QFileSystemModel, QTextEdit, QPlainTextEdit, QTabWidget, QLineEdit, QPushButton
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 from utils import load_file, run, save, new
@@ -24,22 +24,45 @@ class MainWindow(QMainWindow):
         self.tab_widget.currentChanged.connect(self.switch_tab)
 
         # Output area setup
-        self.textEditOutput.setReadOnly(True)
-
+        self.terminal = QWidget()
+        self.terminal_output.setReadOnly(True)
+        terminal_layout = QVBoxLayout()
+        terminal_layout.setContentsMargins(0, 0, 0, 0)
+        terminal_layout.addWidget(self.terminal_output)
+        terminal_layout.addWidget(self.terminal_input)
+        self.terminal.setLayout(terminal_layout)
         splitter1 = QSplitter(Qt.Vertical)
         splitter1.addWidget(self.tab_widget)
-        splitter1.addWidget(self.textEditOutput)
+        splitter1.addWidget(self.terminal)
         splitter1.setStretchFactor(0, 3)
         splitter1.setStretchFactor(1, 2)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.btnRun)
+        layout.addWidget(self.run_btn)
         layout.addWidget(splitter1)
         container = QWidget()
         container.setLayout(layout)
 
-        splitter = QSplitter()
-        splitter.addWidget(self.treeViewWidget)
+        # Tree views
+        tree_search = QLineEdit()
+        tree_close = QPushButton()
+        tree_close.setText("X")
+        tree_btn_widget = QWidget()
+        tree_btn_layout = QHBoxLayout()
+        tree_btn_layout.setContentsMargins(0, 0, 0, 0)
+        tree_btn_layout.addWidget(tree_search)
+        tree_btn_layout.addWidget(tree_close)
+        tree_btn_widget.setLayout(tree_btn_layout)
+
+        tree_layout = QVBoxLayout()
+        tree_main_widget = QWidget()
+        tree_layout.setContentsMargins(0, 0, 0, 0)
+        tree_layout.addWidget(tree_btn_widget)
+        tree_layout.addWidget(self.tree_view)
+        tree_main_widget.setLayout(tree_layout)
+
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(tree_main_widget)
         splitter.addWidget(container)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 4)
@@ -53,7 +76,7 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.statusLabel)
 
         # Connect actions
-        self.btnRun.clicked.connect(self.run_)
+        self.run_btn.clicked.connect(self.run_)
         self.actionSave.triggered.connect(self.save_)
         self.actionSave_as.triggered.connect(self.save_as)
         self.actionNew.triggered.connect(self.new_)
@@ -72,6 +95,7 @@ class MainWindow(QMainWindow):
 
         code_area = QPlainTextEdit()
         code_area.setPlainText(content)
+        code_area.setLineWrapMode(QPlainTextEdit.NoWrap)
         code_area.updateRequest.connect(lambda rect, dy: self.update_line_numbers(code_area, line_number, rect, dy))
 
         highlighter = SyntaxHighlighter(code_area.document())
@@ -141,7 +165,7 @@ class MainWindow(QMainWindow):
             extension = Path(file_info[0]).suffix.lstrip('.')
             name = Path(file_info[0]).name
             self.add_tab(name, content, file_info[0], extension)
-            self.tree_view(file_info[0])
+            self.tree_view_loader(file_info[0])
             self.statusBar().showMessage("File Opened Successfully", 3000)
 
     def save_(self):
@@ -209,35 +233,35 @@ class MainWindow(QMainWindow):
 
             # Open the file in browser via localhost
             webbrowser.open(f"http://localhost:{port}/{filename}")
-            self.textEditOutput.clear()
-            self.textEditOutput.append(f"Serving {filename} at http://localhost:{port}/")
+            self.terminal_output.clear()
+            self.terminal_output.append(f"Serving {filename} at http://localhost:{port}/")
 
         elif extension in ["css", "js"]:
-            self.textEditOutput.clear()
-            self.textEditOutput.append("Please run the HTML file that links to this CSS/JS.")
+            self.terminal_output.clear()
+            self.terminal_output.append("Please run the HTML file that links to this CSS/JS.")
 
         elif extension in ["py", "cpp"]:
             result = run(file_path)
-            self.textEditOutput.clear()
-            self.textEditOutput.append(result)
+            self.terminal_output.clear()
+            self.terminal_output.append(result)
 
         else:
-            self.textEditOutput.clear()
-            self.textEditOutput.append("Cannot run this file type.")
+            self.terminal_output.clear()
+            self.terminal_output.append("Cannot run this file type.")
 
-    def tree_view(self, path):
+    def tree_view_loader(self, path):
         folder = str(Path(path).parent)
         try:
             model = QFileSystemModel()
             model.setRootPath(folder)
-            self.treeViewWidget.setModel(model)
-            self.treeViewWidget.setRootIndex(model.index(folder))
-            self.treeViewWidget.setHeaderHidden(True)
-            self.treeViewWidget.hideColumn(1)
-            self.treeViewWidget.hideColumn(2)
-            self.treeViewWidget.hideColumn(3)
+            self.tree_view.setModel(model)
+            self.tree_view.setRootIndex(model.index(folder))
+            self.tree_view.setHeaderHidden(True)
+            self.tree_view.hideColumn(1)
+            self.tree_view.hideColumn(2)
+            self.tree_view.hideColumn(3)
         except Exception as e:
-            print(e)
+            self.statusBar().showMessage(str(e), 3000)
 
 
 if __name__ == "__main__":

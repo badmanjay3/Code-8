@@ -47,16 +47,9 @@ def new(path):
     with open(path, "w") as file:
         file.write("")
 
-def extension(path: str) -> tuple[str, str]:
-    p = Path(path)
-    file_name = p.stem
-    extension_ = p.suffix
-
-    return file_name, extension_
-
 def run(path):
     result = ''
-    ext = extension(path)[1]
+    ext = Path(path).suffix
     if ext == ".py":
         result =  run_python(path)
     elif ext == ".cpp":

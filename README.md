@@ -52,9 +52,10 @@ This project is not just about making a text editor — it's about:
 - [] Basic debug/tracing support
 - [] Settings panel (fonts, themes, paths)
 - [] Package as `.exe` for Windows
+- [] Git features
 
 ---
 
 ### Phase 5 (Improvements)
-- [] Make tabs moveable
+- [x] Make tabs moveable
 - [] It should be able to open the last open folder when re-opened

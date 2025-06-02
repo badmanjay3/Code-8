@@ -1,4 +1,4 @@
-from subprocess import run
+from subprocess import run as sub_run
 from pathlib import Path
 
 def save(content:str,path:str) -> None | str:
@@ -27,20 +27,20 @@ def load_file(path:str) -> None | str:
         return f"Unexpected error: {e}"
 
 def run_python(path:str):
-    result = run(["python", path], capture_output=True, text=True)
+    result = sub_run(["python", path], capture_output=True, text=True)
     return f"{result.args[0]} \"{result.args[1]}\"\n{result.stdout}\nReturn code: {result.returncode}" if not result.stderr else \
         f"{result.args[0]} \"{result.args[1]}\"\n{result.stderr}\nReturn code: {result.returncode}"
 
 def run_cpp(path):
     exe_path = Path(path).with_suffix('.exe')  # e.g., "main.cpp" → "main.exe"
 
-    compile_result = run(["g++", path, "-o", str(exe_path)], capture_output=True, text=True)
+    compile_result = sub_run(["g++", path, "-o", str(exe_path)], capture_output=True, text=True)
 
     if compile_result.returncode != 0:
         return compile_result.stderr  # Compilation error
 
     # Step 2: Run
-    run_result = run([str(exe_path)], capture_output=True, text=True)
+    run_result = sub_run([str(exe_path)], capture_output=True, text=True)
     return run_result.stdout + run_result.stderr
 
 def new(path):
